@@ -1,0 +1,19 @@
+---
+- name: deploy environment setup
+  hosts:
+    - eaasibuild
+  become: true
+  tasks:
+    - package:
+        name: python
+        state: present
+    - package:
+        name: docker.io
+        state: present
+    - git: 
+        repo: 'https://gitlab.com/eaasi/eaasi-installer' 
+        version: master
+        dest: eaasi-installer
+    - command:
+        chdir: /home/ubuntu/eaasi-installer
+        executable: /home/ubuntu/scripts/prepare.sh

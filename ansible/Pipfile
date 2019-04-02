@@ -1,0 +1,31 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+ansible = "==2.5.0rc1"
+"boto3" = "*"
+aws-shell = "*"
+"boto3-session-cache" = "*"
+botocore = "*"
+aws-encryption-sdk = "*"
+cryptography = "*"
+httpie = "*"
+jmespath = "*"
+boto = "*"
+configparser = "*"
+pip = "*"
+mysql-connector = "*"
+
+
+[dev-packages]
+
+
+
+[requires]
+
+python_version = "3.6"

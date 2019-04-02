@@ -1,0 +1,17 @@
+ansible_ssh_host: 172.22.242.154
+host: 52.1.153.14
+ssh_host: 172.22.242.154
+# Build and tag parameters
+ami_id: ami-0080e4c5bc078760e
+subnet_id: subnet-d94a0af4
+instance_type: t3.micro
+tagName: testlibnd-eaasi-build
+tagContact: lib-esu-group@nd.edu
+tagDescription: "Eaasi Build Server"
+tagEnvironment: test
+tagOwner: hanstra
+tagService: "eaasi"
+tagSchedule: Mon 8-18,Tue 8-18,Wed 8-18,Thu 8-18,Fri 8-18
+tagBackup: True
+security_groups: sg-bd3e9cc1
+elastic_IP_alloc: eipalloc-0f185943e6655d019 
