@@ -15,3 +15,4 @@ tagSchedule: Mon 8-18,Tue 8-18,Wed 8-18,Thu 8-18,Fri 8-18
 tagBackup: True
 security_groups: sg-bd3e9cc1
 elastic_IP_alloc: eipalloc-0f185943e6655d019 
+eaasi_private_val: "{{ lookup('aws_ssm', '/all/eaasi/eaasipem' , decrypt=True ) }}"

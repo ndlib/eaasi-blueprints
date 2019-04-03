@@ -2,18 +2,45 @@
 - name: deploy environment setup
   hosts:
     - eaasibuild
-  become: true
   tasks:
-    - package:
+    - name: install python
+      package:
         name: python
         state: present
-    - package:
-        name: docker.io
+      become: true
+    - name: install docker
+      package:
+        name: docker
         state: present
-    - git: 
+      become: true
+    - name: install git
+      package:
+        name: git
+        state: present
+      become: true
+    - name: clone eaasi-installer repo
+      git: 
         repo: 'https://gitlab.com/eaasi/eaasi-installer' 
         version: master
         dest: eaasi-installer
-    - command:
-        chdir: /home/ubuntu/eaasi-installer
-        executable: /home/ubuntu/scripts/prepare.sh
+        force: true
+    - name: copy fixed alpine buildimage shell
+      template:
+        src: build-image.sh.j2
+        dest: /home/ec2-user/eaasi-installer/eaas/ansible/docker/alpine/build-images.sh 
+        owner: ec2-user
+        group: ec2-user
+        mode: '0755'
+    - name:  run prepare script  
+      shell: ./scripts/prepare.sh
+      args:
+        chdir: eaasi-installer
+        creates: /home/ec2-user/eaasi-installer/artifacts/ssh/admin.key.pub
+    - name: add admin private key
+      template: 
+        src: admin.key.j2
+        dest: /home/ec2-user/eaasi-installer/artifacts/ssh/admin.key
+        owner: ec2-user
+        group: ec2-user
+        mode: '0400'
+

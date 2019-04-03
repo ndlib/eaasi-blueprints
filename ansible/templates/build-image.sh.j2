@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+exec docker build --force-rm \
+    --build-arg "uid=501" \
+    --build-arg "gid=501" \
+    --tag eaas/alpine \
+    .
