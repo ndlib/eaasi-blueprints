@@ -13,22 +13,22 @@ pipenv install
 ```
 to set up the environment. Once this is down, you should be able to do any of the following:
 
-### Create an EAASI build server in AWS using Cloud Fornation
+### Create an EAASI build server in AWS using Cloud Formation
 
 ```
-**pipenv run ansible-playbook create-eaasibuild.yml**
+pipenv run ansible-playbook create-eaasibuild.yml
 ```
 
 ### Create an empty EAASI server in AWS
 
 ```
-**pipenv run ansible-playbook create-eaasihost.yml**
+pipenv run ansible-playbook create-eaasihost.yml
 ```
 
 ### Deploy EAASI to the EASSI server from the build server 
 
 ```
-**pipenv run ansible-playbook deploy-eaasi.yml**
+pipenv run ansible-playbook deploy-eaasi.yml
 ```
 
 Your hosts need to be added to the *hosts* file.
@@ -36,10 +36,10 @@ Your hosts need to be added to the *hosts* file.
 Each host needs a entry named after itself in the *host_vars* subdirectory, specifying the following AWS resources
 
 ```
-**ami_id:** ami-id of Operating System (I've used only AWS Linux and Ubuntu)
-**subnet_id:** subnet-id of your Amazon VPN
-**instance_type:** I use t3.micro for the build and t2.2xlarge for the EAASI Server
-**security_groups:** security group id -needs to allow public access to ports 80 and 443, and access to port 22 for you
-**elastic_IP_alloc:** An Elastic IP address
+ami_id: ami-id of Operating System (I've used only AWS Linux and Ubuntu)
+subnet_id: subnet-id of your Amazon VPN
+instance_type: I use t3.micro for the build and t2.2xlarge for the EAASI Server
+security_groups: security group id -needs to allow public access to ports 80 and 443, and access to port 22 for you
+elastic_IP_alloc: An Elastic IP address
 ```
 
