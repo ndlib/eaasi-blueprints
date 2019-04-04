@@ -13,5 +13,5 @@ tagOwner: hanstra
 tagService: "eaasi"
 tagSchedule: Mon 8-18,Tue 8-18,Wed 8-18,Thu 8-18,Fri 8-18
 tagBackup: True
-security_groups: sg-bd3e9cc1
+security_groups: sg-002feab0d183b404c
 elastic_IP_alloc: eipalloc-0a904e6e200860211

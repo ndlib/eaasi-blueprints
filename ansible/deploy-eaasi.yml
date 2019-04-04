@@ -37,10 +37,28 @@
         chdir: eaasi-installer
         creates: /home/ec2-user/eaasi-installer/artifacts/ssh/admin.key.pub
     - name: add admin private key
-      template: 
-        src: admin.key.j2
+      copy: 
+        src: /Users/msuhovec/.ssh/eaasi.pem
         dest: /home/ec2-user/eaasi-installer/artifacts/ssh/admin.key
         owner: ec2-user
         group: ec2-user
         mode: '0400'
+    - name: copy host.yml
+      template: 
+        src: hosts.yaml.j2
+        dest: /home/ec2-user/eaasi-installer/artifacts/config/hosts.yaml
+        owner: ec2-user
+        group: ec2-user
+        mode: '0444'
+    - name: copy eaasi.yml
+      template: 
+        src: eaasi.yaml.j2
+        dest: /home/ec2-user/eaasi-installer/artifacts/config/eaasi.yaml
+        owner: ec2-user
+        group: ec2-user
+        mode: '0444'
+    - name:  run deploy script  
+      shell: ./scripts/deploy.sh
+      args:
+        chdir: eaasi-installer
 
