@@ -1,0 +1,17 @@
+ansible_ssh_host: 172.22.242.153
+host: eaasitest.library.nd.edu
+ssh_host: eassitest.lc.nd.edu
+# Build and tag parameters
+ami_id: ami-0a313d6098716f372
+subnet_id: subnet-d94a0af4
+instance_type: t2.2xlarge
+tagName: testlibnd-eaasi-test
+tagContact: lib-esu-group@nd.edu
+tagDescription: "testlibnd EAASI Server"
+tagEnvironment: test
+tagOwner: hanstra
+tagService: "eaasi"
+tagSchedule: Mon 8-18,Tue 8-18,Wed 8-18,Thu 8-18,Fri 8-18
+tagBackup: True
+security_groups: sg-002feab0d183b404c
+elastic_IP_alloc: eipalloc-0a904e6e200860211

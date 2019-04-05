@@ -1,0 +1,39 @@
+---
+- name: Deploy server using Cloudformation
+  hosts:
+    - eaasibuild
+  connection: local
+  gather_facts: false
+  become: false
+  vars:
+    machine_name: '{{ tagName }}'
+    required:
+      Name: '{{ tagName }}'
+      Owner: '{{ tagOwner }}'
+      Contact: '{{ tagContact }}'
+      Description: '{{ tagDescription }}'
+      Service: '{{ tagService }}'
+      FQDN: '{{ host }}'
+    machine_parameters:
+      SecurityGroupIds: '{{ security_groups }}'
+      KeyName: eaasi-test
+      Environment: '{{ tagEnvironment }}'
+      InstanceType: '{{ instance_type }}'
+      AMI: '{{ ami_id }}'
+      SubnetId: '{{ subnet_id }}'
+      PrivateIP: '{{ ansible_ssh_host }}'
+      ElasticIPAllocation: '{{ elastic_IP_alloc }}'
+# Libnd Instance Profile
+#      IamInstanceProfile: 'iam-BasicInstanceProfile-1WT0D3FLL2TQV'
+# Testlibnd Instance Profile
+      IamInstanceProfile: 'iam-BasicInstanceProfile-17NSUPONCJXZL'
+  tasks:
+    - name: Launch EC2 instance using Cloud Formation
+      cloudformation:
+        state: present
+        template: "files/libnd-cf.yaml"
+#        termination_protection: "{{ TerminationProtection }}"
+        stack_name: '{{ machine_name }}'
+        template_parameters: '{{ machine_parameters }}'
+        tags: '{{ required }}'
+

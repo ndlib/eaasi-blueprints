@@ -1,0 +1,198 @@
+Description: EC2 Basic Cloudformation Template
+# Required CloudFormation Tags:
+#   - Name (machine name)
+#   - Owner (netid)
+#   - Contact (email)
+#   - Description
+#   - Service
+#   - FQDN
+
+Outputs:
+  PrivateIP:
+    Description: Allocated Private IP Address
+    Value: !GetAtt Instance.PrivateIp
+  PrivateDNS:
+    Description: AWS Private DNS
+    Value: !GetAtt Instance.PrivateDnsName
+  PublicIP:
+    Description: Allocated Public IP Address
+    Condition: HasEIP
+    Value: !GetAtt Instance.PublicIp
+  PublicDNS:
+    Description: AWS Public DNS
+    Condition: HasEIP
+    Value: !GetAtt Instance.PublicDnsName
+  InstanceId:
+    Description: Instance Id of the EC2 instance.
+    Value: !Ref Instance
+
+Parameters:
+  InstanceType:
+    Type: String
+    Description: Instance Type and Size
+    Default: t2.micro
+  AMI:
+    Type: AWS::EC2::Image::Id
+    Description: AMI ID
+    ConstraintDescription: AMI available in the current region
+  ElasticNetworkInterface:
+      Type: String
+      Description: Existing (Elastic) Network Interface
+      AllowedPattern: '(eni-[0-9a-z]{8,17})?'
+      Default: ''
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet ID
+    ConstraintDescription: Existing SubnetId
+    Default: ''
+  PrivateIP:
+    Type: String
+    Description: Private IP in the existing SubnetId
+    ConstraintDescription: Available IP address in the existing Subnet
+    AllowedPattern: '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})?'
+    Default: ''
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Private SSH Key
+    ConstraintDescription: Existing AWS Key Pair
+    Default: ''
+  SecurityGroupIds:
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: Existing Security Groups
+    Default: ''
+  IamInstanceProfile:
+    Type: String
+    Description: IamInstanceProfile
+    Default: ''
+  ElasticIPAllocation:
+    Type: String
+    Description: Elastic IP Allocation Id
+    ConstraintDescription: Existing Elastic IP Allocation Id
+    AllowedPattern: '(eipalloc-[0-9a-z]{8,17})?'
+    Default: ''
+  Environment:
+    Type: String
+    Description: Deployment Environment
+    AllowedValues:
+      - production
+      - test
+      - staging
+      - temp
+      - dev
+      - prep
+    Default: 'prep'
+  PlacementGroupName:
+    Type: String
+    Description: Placement Group for Clustering (not for t2 instances)
+    Default: ''
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Provenance
+        Parameters:
+          - Environment
+        ParameterLabels:
+          Environment:
+            default: Deployment Environment
+      - Label:
+          default: AWS Configuration
+        Parameters:
+          - InstanceType
+          - AMI
+          - KeyName
+          - SubnetId
+          - SecurityGroupIds
+        ParameterLabels:
+          InstanceType:
+            default: Instance Size to Create
+          AMI:
+            default: Amazon AMI
+          KeyName:
+            default: Amazon SSH Key
+          SubnetId:
+            default: Subnet ID (required if no ENI)
+          SecurityGroupIds:
+            default: List of Security Group Ids
+      - Label:
+          default: AWS Advanced Settings
+        Parameters:
+          - IamInstanceProfile
+          - PlacementGroupName
+          - ElasticNetworkInterface
+          - PrivateIP
+          - ElasticIPAllocation
+        ParameterLabels:
+          IamInstanceProfile:
+            default: IAM Instance Profile
+          PlacementGroupName:
+            default: Placement Group for Clustering (not for t2 instances) in Subnet's AZ
+          ElasticNetworkInterface:
+            default: Existing (Elastic) Network Interface
+          PrivateIP:
+            default: Private IP in the existing SubnetId
+          ElasticIPAllocation:
+            default: Elastic IP Allocation Id
+
+Conditions:
+  HasNoENI: !Equals [!Ref ElasticNetworkInterface, '']
+  HasPrivateIP: !Not [!Equals [!Ref PrivateIP, '']]
+  HasKeyName: !Not [!Equals [!Ref KeyName, '']]
+  HasIamInstanceProfile: !Not [!Equals [!Ref IamInstanceProfile, '']]
+  HasEIP: !Not [!Equals [!Ref ElasticIPAllocation, '']]
+  IsProduction: !Equals [!Ref Environment, production]
+
+Resources:
+  NetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Condition: HasNoENI
+    Properties:
+      SubnetId: !Ref SubnetId
+      Description: !Ref AWS::StackName
+      GroupSet: !Ref SecurityGroupIds
+      PrivateIpAddress: !If [HasPrivateIP, !Ref PrivateIP, !Ref 'AWS::NoValue']
+  EIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Condition: HasEIP
+    Properties:
+      AllocationId: !Ref ElasticIPAllocation
+      NetworkInterfaceId: !If [HasNoENI, !Ref NetworkInterface, !Ref ElasticNetworkInterface]
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      Monitoring: !If [IsProduction, true, false]
+      DisableApiTermination: !If [IsProduction, true, false]
+      ImageId: !Ref AMI
+      InstanceType: !Ref InstanceType
+      KeyName: !If [HasKeyName, !Ref KeyName, !Ref 'AWS::NoValue']
+      IamInstanceProfile: !If [HasIamInstanceProfile, !Ref IamInstanceProfile, !Ref 'AWS::NoValue']
+      PlacementGroupName: !Ref PlacementGroupName
+      NetworkInterfaces:
+        - DeviceIndex: '0'
+          NetworkInterfaceId: !If [HasNoENI, !Ref NetworkInterface, !Ref ElasticNetworkInterface]
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+        - Key: Schedule
+          Value: !If [IsProduction, '*', 'Mon 8-18,Tue 8-18,Wed 8-18,Thu 8-18,Fri 8-18']
+      UserData:
+        Fn::Base64: !Sub |
+          #cloud-config
+          script: |
+            <script>
+             tzutil /s "Eastern Standard Time"
+            </script>
+          repo_upgrade: all
+          package_update: true
+          package_upgrade: true
+          timezone: US/Eastern
+          manage_etc_hosts: template
+          disable_ec2_metadata: false
+          disable_root: true
+          ssh_genkeytypes: [ rsa, ed25519 ]
+          ssh_pwauth: true
+          power_state:
+            delay: now
+            mode: reboot
+            condition: true
