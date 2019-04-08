@@ -1,0 +1,34 @@
+---
+####
+#### NOTE: This attaches to a specific Instance ID. Please update that value appropriately
+####       In addition, the values for the size of the disk are coded directly here since this 
+####       playbook is specific for this disk.
+####
+- name: Add volume to server using Cloudformation
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    stack_name: testlibnd-eaasi-ebs-volume
+    template: files/cf-createvolume.yaml
+    stack_parameters:
+      AvailabilityZone: us-east-1d
+      VolumeSize: 250
+      VolumeType: gp2
+    stack_tags:
+      Name: '{{ stack_name }}'
+      Owner: 'hanstra'
+      Description: 'testlibnd-eaasi--ebs-volume EBS Volume'
+      Contact: lib-esu-group@nd.edu
+
+  tasks:
+  - name: CloudFormation
+    cloudformation:
+      region: us-east-1
+      stack_name: '{{ stack_name }}'
+      state: present
+      template: '{{ template }}'
+      template_parameters: '{{ stack_parameters }}'
+      tags: '{{ stack_tags }}'
+    register: cf_facts
