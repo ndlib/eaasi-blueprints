@@ -1,0 +1,58 @@
+iAWSTemplateFormatVersion: '2010-09-09'
+
+
+Description: |
+  Create a secondary volume with no attachments
+
+Outputs:
+
+  VolumeId:
+    Description: Volume Id after creation
+    Value: !Ref Volume
+
+Parameters:
+
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+    Description: AvailabilityZone (must match the Instance to be attached)
+    Default: us-east-1d
+
+  Encrypted:
+    Type: String
+    Description: Is the volume encrypted
+    Default: 'true'
+
+  VolumeSize:
+    Type: Number
+    Description: Size of the Volume in GB
+    Default: 500
+
+  VolumeType:
+    Type: String
+    Description: AWS Volume Type
+    Default: sc1
+    AllowedValues:
+      - gp2
+      - io1
+      - st1
+      - sc1
+
+  SnapshotId:
+    Type: String
+    Description: Snapshot to use to create the Volume
+    Default: ''
+
+Conditions:
+  NoSnapshotId: !Equals ['', !Ref SnapshotId]
+
+Resources:
+
+  Volume:
+    Type: AWS::EC2::Volume
+    DeletionPolicy: Snapshot
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZone
+      Size: !Ref VolumeSize
+      VolumeType: !Ref VolumeType
+      Encrypted: !Ref Encrypted
+      SnapshotId: !If [NoSnapshotId, !Ref 'AWS::NoValue', !Ref SnapshotId]
