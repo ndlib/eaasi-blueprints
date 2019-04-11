@@ -13,7 +13,7 @@
     stack_name: testlibnd-eaasi-ebs-volume
     template: files/cf-createvolume.yaml
     stack_parameters:
-      AvailabilityZone: us-east-1d
+      AvailabilityZone: us-east-1b
       VolumeSize: 250
       VolumeType: gp2
     stack_tags:
@@ -25,7 +25,7 @@
   tasks:
   - name: CloudFormation
     cloudformation:
-      region: us-east-1
+      region: us-east-1b
       stack_name: '{{ stack_name }}'
       state: present
       template: '{{ template }}'

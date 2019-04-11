@@ -28,11 +28,32 @@
 # Testlibnd Instance Profile
       IamInstanceProfile: 'iam-BasicInstanceProfile-17NSUPONCJXZL'
   tasks:
-    - name: Launch EC2 instance using Cloud Formation
-      cloudformation:
+    - name: Attach the Secondary Volume (if there is one)
+      ec2_vol:
+        instance: "{{ instance_id }}"
+        id: "{{ SecondaryVolume }}"
+        device_name: "{{ volume_device }}"
+        region: us-east-1
+        delete_on_termination: no
         state: present
-        template: "files/libnd-cf.yaml"
-#        termination_protection: "{{ TerminationProtection }}"
-        stack_name: '{{ machine_name }}'
-        template_parameters: '{{ machine_parameters }}'
-        tags: '{{ required }}'
+      when: SecondaryVolume != ""
+
+    - name: Tag the Secondary Volume (if there is one)
+      ec2_tag:
+        resource: "{{ SecondaryVolume }}"
+        region: us-east-1
+        tags:
+          Backup: "{{ tagBackup }}"
+          Name: "{{ tagName }}-vol2"
+        state: present
+      when: SecondaryVolume != ""
+    
+    - name: mount /eaas-home
+      mount: 
+        path: /eaas-home
+        src: "{{ volume_device }}"
+        fstype: ext4
+        opts: rw
+        state: mounted
+      become: true
+
