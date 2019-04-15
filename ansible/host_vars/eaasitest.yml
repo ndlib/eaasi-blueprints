@@ -5,7 +5,7 @@ ssh_host: eassitest.lc.nd.edu
 ami_id: ami-0a313d6098716f372
 subnet_id: subnet-d94a0af4
 instance_type: t2.2xlarge
-instance_id: i-01ec400944a205827
+instance_id: i-0f2e52391a881d883
 tagName: testlibnd-eaasi-test
 tagContact: lib-esu-group@nd.edu
 tagDescription: "testlibnd EAASI Server"
